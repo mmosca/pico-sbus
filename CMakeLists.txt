@@ -13,7 +13,12 @@ pico_sdk_init()
 
 add_executable(pico-sbus
 	pico-sbus.c
+    sbus.c
 )
+
+# enable usb output, disable uart output
+pico_enable_stdio_usb(pico-sbus 1)
+pico_enable_stdio_uart(pico-sbus 0)
 
 target_link_libraries(pico-sbus pico_stdlib)
 
