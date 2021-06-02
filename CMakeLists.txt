@@ -11,10 +11,10 @@ pico_sdk_init()
 
 # rest of your project
 
-add_executable(uart_advanced
-	uart_advanced.c
+add_executable(pico-sbus
+	pico-sbus.c
 )
 
-target_link_libraries(uart_advanced pico_stdlib)
+target_link_libraries(pico-sbus pico_stdlib)
 
-pico_add_extra_outputs(uart_advanced)
+pico_add_extra_outputs(pico-sbus)
