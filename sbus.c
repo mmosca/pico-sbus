@@ -7,6 +7,7 @@
 #include "pico/stdlib.h"
 #include "hardware/uart.h"
 #include "hardware/irq.h"
+#include "pico/sync.h"
 
 volatile int irq_count = 0;
 
@@ -17,6 +18,8 @@ volatile uint8_t newest = 0;
 volatile uint8_t stored = 0;
 volatile int sbus_index = 0;
 volatile bool hasStartByte = false;
+
+critical_section_t fifo_lock;
 
 #ifndef MAX
 #define MAX(a, b) (a > b ? a : b)
@@ -50,28 +53,39 @@ void decode_sbus_data(const uint8_t *data, sbus_state_t *decoded)
         for(int i = bitsInFirstByte - 1; i >= 0; i--)
         {
             D(printf("Byte1: bit %i (%i)\n", i, bitsInFirstByte));
-            int bit = data[byte] & (1<<i);
+            uint16_t bit = data[byte] & (1<<i);
             chData <<= 1;
-            chData |= bit ? 1 : 0;
+            if(bit)
+            {
+                chData |= 1;
+            }
         }
 
         for(int i = 0; i < bitsInSecondByte; i++)
         {
             int shift = 7 - i;
             D(printf("Byte2: bit %i (%i)\n", shift, bitsInSecondByte));
-            int bit = data[byte + 1] & (1 << shift);
+            uint16_t bit = data[byte + 1] & (1 << shift);
             chData <<= 1;
-            chData |= bit ? 1 : 0;
+            if(bit)
+            {
+                chData |= 1;
+            }
         }
 
         for(int i = 0; i < bitsInThirdByte; i++)
         {
             int shift = 7 - i;
             D(printf("Byte3: bit %i (%i)\n", shift, bitsInThirdByte));
-            int bit = data[byte + 2] & (1 << shift);
+            uint16_t bit = data[byte + 2] & (1 << shift);
             chData <<= 1;
-            chData |= bit ? 1 : 0;
+            if(bit)
+            {
+                chData |= 1;
+            }
         }
+
+        chData &= SBUS_CHANNEL_BIT_MASK;
 
         if(channel == 0) {
             decoded->ch1 = chData;
@@ -114,19 +128,39 @@ void decode_sbus_data(const uint8_t *data, sbus_state_t *decoded)
     decoded->failsafe = data[23] & 0x10;
 }
 
-bool hasSbusData()
+void sbus_init()
 {
-    return stored > 0;
+    // init mutex
+    critical_section_init(&fifo_lock);
+    // clear fifo
+    for(int i = 0; i < SBUS_FIFO_SIZE; ++i)
+    {
+        memset((void *)sbus_data[i], 0, SBUS_MESSAGE_MAX_SIZE);
+    }
+    oldest = newest = stored = 0;
+
+    // TODO: move interrupt and uart setup here
 }
 
-void readSbusData(uint8_t *data)
+bool hasSbusData()
 {
+    return stored > 0 && oldest != newest;
+}
+
+bool readSbusData(uint8_t *data)
+{
+    bool ret = false;
+    critical_section_enter_blocking(&fifo_lock);
     if(hasSbusData())
     {
         memcpy((void *)data, (void *)sbus_data[oldest], SBUS_MESSAGE_MAX_SIZE);
         oldest = (oldest + 1) % SBUS_FIFO_SIZE;
         stored--;
+        ret = true;
     }
+    critical_section_exit(&fifo_lock);
+
+    return ret;
 }
 
 // RX interrupt handler
@@ -150,16 +184,22 @@ void sbus_on_uart_rx() {
 
             if(current_sbus_data[SBUS_MESSAGE_MAX_SIZE - 1] == SBUS_ENDBYTE)
             {
+                critical_section_enter_blocking(&fifo_lock);
                 uint8_t nextNewest = (newest + 1) % SBUS_FIFO_SIZE;
                 // full package
                 memcpy((void *)sbus_data[nextNewest], (void *)current_sbus_data, SBUS_MESSAGE_MAX_SIZE);
                 newest = nextNewest;
+                if(oldest = nextNewest)
+                {
+                    oldest = (oldest + 1) % SBUS_FIFO_SIZE;
+                }
+
                 stored++;
                 if(stored > SBUS_FIFO_SIZE)
                 {
-                    oldest =  (oldest + 1) % SBUS_FIFO_SIZE;
                     stored = SBUS_FIFO_SIZE;
                 }
+                critical_section_exit(&fifo_lock);
             }
         }
     }

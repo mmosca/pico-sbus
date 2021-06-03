@@ -20,6 +20,8 @@
 #define SBUS_STARTBYTE	0x0F
 #define SBUS_ENDBYTE	0X00
 #define SBUS_MESSAGE_MAX_SIZE 25
+#define SBUS_CHANNEL_BIT_MASK   0x7FF
+#define SBUS_CHANNEL_BIT_MASK_NO_FIRST_BIT (SBUS_CHANNEL_BITS & ~1)
 
 #define SBUS_FIFO_SIZE	4
 
@@ -48,10 +50,12 @@ typedef struct {
 
 bool hasSbusData();
 
-void readSbusData(uint8_t *data);
+bool readSbusData(uint8_t *data);
 
 void sbus_on_uart_rx();
 
 void decode_sbus_data(const uint8_t *data, sbus_state_t *decoded);
+
+void sbus_init();
 
 #endif

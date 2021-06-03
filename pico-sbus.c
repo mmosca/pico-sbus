@@ -17,6 +17,7 @@ extern volatile uint8_t stored;
 
 int main() {
     stdio_init_all();
+    sbus_init();
     // Set up our UART with a basic baud rate.
     uart_init(SBUS_UART_ID, 115200);
 
@@ -57,17 +58,43 @@ int main() {
     // Now enable the UART to send interrupts - RX only
     uart_set_irq_enables(SBUS_UART_ID, true, false);
 
-    uint8_t sbusData[SBUS_MESSAGE_MAX_SIZE];
+    uint8_t sbusData[SBUS_MESSAGE_MAX_SIZE] = {};
 
     while (1)
     {
         if(hasSbusData())
         {
-            sbus_state_t sbus = {};
-            gpio_put(PICO_DEFAULT_LED_PIN, 1);
-            decode_sbus_data(sbusData, &sbus);
-            printf("ch1: %i Frame lost: %i Failsafe: %i\n", sbus.ch1, sbus.framelost, sbus.failsafe);
-            gpio_put(PICO_DEFAULT_LED_PIN, 0);
+            if(readSbusData(sbusData))
+            {
+                sbus_state_t sbus = {};
+                gpio_put(PICO_DEFAULT_LED_PIN, 1);
+                memset(&sbus, 0, sizeof(sbus_state_t));
+                decode_sbus_data(sbusData, &sbus);
+
+                printf("\033[23");
+                printf("\033[H");
+
+                printf("Ch1 : %u\n", sbus.ch1);
+                printf("Ch2 : %u\n", sbus.ch2);
+                printf("Ch3 : %u\n", sbus.ch3);
+                printf("Ch4 : %u\n", sbus.ch4);
+                printf("Ch5 : %u\n", sbus.ch5);
+                printf("Ch6 : %u\n", sbus.ch6);
+                printf("Ch7 : %u\n", sbus.ch7);
+                printf("Ch8 : %u\n", sbus.ch8);
+                printf("Ch9 : %u\n", sbus.ch9);
+                printf("Ch10: %u\n", sbus.ch10);
+                printf("Ch11: %u\n", sbus.ch11);
+                printf("Ch12: %u\n", sbus.ch12);
+                printf("Ch13: %u\n", sbus.ch13);
+                printf("Ch14: %u\n", sbus.ch14);
+                printf("Ch15: %u\n", sbus.ch15);
+                printf("Ch16: %u\n", sbus.ch16);
+                printf("Ch17: %u\n", sbus.dch17);
+                printf("Ch18: %u\n", sbus.dch18);
+                printf("Frame lost: %i Failsafe: %i\n", sbus.framelost, sbus.failsafe);
+                gpio_put(PICO_DEFAULT_LED_PIN, 0);
+            }
 
             sleep_ms(500);
         }
