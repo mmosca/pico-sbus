@@ -4,4 +4,4 @@ OPENOCD_TARGET=/usr/share/openocd/scripts/target/rp2040.cfg
 
 set -x
 
-openocd -f $OPENOCD_IFACE -f $OPENOCD_TARGET
+openocd -f $OPENOCD_IFACE -f $OPENOCD_TARGET -f openocd-remote.cfg

@@ -1,0 +1,48 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.19041.0",
+            //"compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30037/bin/Hostx64/x64/cl.exe",
+            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30037/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "${default}"
+        },
+        {
+            "name": "pico-arm-windows",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}\\..\\pico-sdk\\src\\common\\pico_stdlib\\include",
+                "${workspaceFolder}\\..\\pico-sdk\\src\\common\\boot_picoboot\\include",
+                "${workspaceFolder}\\..\\pico-sdk\\src\\common\\boot_uf2\\include",
+                "${workspaceFolder}\\..\\pico-sdk\\src\\common\\pico_base\\include",
+                "${workspaceFolder}\\..\\pico-sdk\\src\\common\\pico_binary_info\\include",
+                "${workspaceFolder}\\..\\pico-sdk\\src\\common\\pico_bit_ops\\include",
+                "${workspaceFolder}\\..\\pico-sdk\\src\\common\\pico_divider\\include",
+                "${workspaceFolder}\\..\\pico-sdk\\src\\common\\pico_sync\\include",
+                "${workspaceFolder}\\..\\pico-sdk\\src\\common\\pico_time\\include",
+                "${workspaceFolder}\\..\\pico-sdk\\src\\common\\pico_util\\include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerPath": "E:\\pico\\GNU Arm Embedded Toolchain\\10 2020-q4-major\\bin\\arm-none-eabi-gcc.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-arm"
+        }
+    ],
+    "version": 4
+}
