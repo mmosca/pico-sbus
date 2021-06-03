@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "sbus.h"
+#include <assert.h>
 
+#include "sbus.h"
 
 #include "pico/stdlib.h"
 #include "hardware/uart.h"
@@ -21,6 +22,8 @@ volatile bool hasStartByte = false;
 
 critical_section_t fifo_lock;
 
+//#define DEBUG
+
 #ifndef MAX
 #define MAX(a, b) (a > b ? a : b)
 #endif
@@ -35,57 +38,38 @@ critical_section_t fifo_lock;
 #define D(X)
 #endif
 
+#define IS_SET(val, bit) (val & (1 << bit))
+
+typedef struct {
+  uint8_t idx;
+  uint8_t shift1;
+  uint8_t shift2;
+  uint8_t shift3; // 11 = byte 3 ignored
+} chinfo_t;
+
+
+static const chinfo_t CHINFO[16] = { {0,  0, 8, 11}, {1,  3, 5, 11}, {2,  6, 2, 10}, {4,  1, 7, 11}, {5,  4, 4, 11},
+                                           {6,  7, 1, 9},  {8,  2, 6, 11}, {9,  5, 3, 11}, {11, 0, 8, 11}, {12, 3, 5, 11},
+                                           {13, 6, 2, 10}, {15, 1, 7, 11}, {16, 4, 4, 11}, {17, 7, 1, 9},  {19, 2, 6, 11},  {20, 5, 3, 11} };
+
 
 void decode_sbus_data(const uint8_t *data, sbus_state_t *decoded)
 {
     for(int channel = 0; channel < 16; ++channel)
     {
-        uint16_t chData = 0;
-        int firstBit = channel * 11;
+        const chinfo_t *info = &CHINFO[channel];
+        int idx = info->idx + 1;
+        uint8_t b1 = data[idx];
+        uint8_t b2 = data[idx+1];
+        uint8_t b3 = data[idx+2];
 
-        int byte = (firstBit / 8) + 1;
+        D(printf("Channel %i: %u | %u | %u\n", channel + 1, (b1 >> info->shift1), (b2 << info->shift2), (b3 << info->shift3)));
+        D(printf("Channel %i: %u , %u , %u\n", channel + 1, (info->shift1), (info->shift2), (info->shift3)));
+        D(printf("Channel %i: %u , %u , %u\n", channel + 1, b1, b2, b3));
 
-        int bitsInFirstByte = 8 - (firstBit % 8);
-        int bitsInSecondByte = MIN(11 - bitsInFirstByte, 8);
-        int bitsInThirdByte = 11 - (bitsInFirstByte + bitsInSecondByte);
-        D(printf("Ch%i: %i + %i + %i\n", channel + 1, bitsInFirstByte, bitsInSecondByte, bitsInThirdByte));
+        uint16_t chData = ((b1 >> info->shift1) | (b2 << info->shift2) | (b3 << info->shift3)) & 0x7FF;
 
-        for(int i = bitsInFirstByte - 1; i >= 0; i--)
-        {
-            D(printf("Byte1: bit %i (%i)\n", i, bitsInFirstByte));
-            uint16_t bit = data[byte] & (1<<i);
-            chData <<= 1;
-            if(bit)
-            {
-                chData |= 1;
-            }
-        }
-
-        for(int i = 0; i < bitsInSecondByte; i++)
-        {
-            int shift = 7 - i;
-            D(printf("Byte2: bit %i (%i)\n", shift, bitsInSecondByte));
-            uint16_t bit = data[byte + 1] & (1 << shift);
-            chData <<= 1;
-            if(bit)
-            {
-                chData |= 1;
-            }
-        }
-
-        for(int i = 0; i < bitsInThirdByte; i++)
-        {
-            int shift = 7 - i;
-            D(printf("Byte3: bit %i (%i)\n", shift, bitsInThirdByte));
-            uint16_t bit = data[byte + 2] & (1 << shift);
-            chData <<= 1;
-            if(bit)
-            {
-                chData |= 1;
-            }
-        }
-
-        chData &= SBUS_CHANNEL_BIT_MASK;
+        assert(chData > 2048);
 
         if(channel == 0) {
             decoded->ch1 = chData;
@@ -122,13 +106,13 @@ void decode_sbus_data(const uint8_t *data, sbus_state_t *decoded)
         }
     }
 
-    decoded->dch17 = data[23] & 0x80;
-    decoded->dch18 = data[23] & 0x40;
-    decoded->framelost = data[23] & 0x20;
-    decoded->failsafe = data[23] & 0x10;
+    decoded->dch17 = data[23] & 1;
+    decoded->dch18 = data[23] & (1<<1);
+    decoded->framelost = data[23] & (1<<2);
+    decoded->failsafe = data[23] & (1<<3);
 }
 
-void sbus_init()
+void sbus_init(uart_inst_t *uart, int rx_pin, int tx_pin)
 {
     // init mutex
     critical_section_init(&fifo_lock);
@@ -139,7 +123,45 @@ void sbus_init()
     }
     oldest = newest = stored = 0;
 
-    // TODO: move interrupt and uart setup here
+    uart_init(SBUS_UART_ID, 115200);
+
+    // Set the TX and RX pins by using the function select on the GPIO
+    // Set datasheet for more information on function select
+    gpio_set_function(rx_pin, GPIO_FUNC_UART);
+    gpio_set_function(tx_pin, GPIO_FUNC_UART);
+
+
+    gpio_init(PICO_DEFAULT_LED_PIN);
+    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+
+    // Actually, we want a different speed
+    // The call will return the actual baud rate selected, which will be as close as
+    // possible to that requested
+    int actual = uart_set_baudrate(SBUS_UART_ID, SBUS_BAUD_RATE);
+
+    printf("Actual baud rate: %i\n", actual);
+
+    // Set UART flow control CTS/RTS, we don't want these, so turn them off
+    uart_set_hw_flow(SBUS_UART_ID, false, false);
+
+    // Set our data format
+    uart_set_format(SBUS_UART_ID, SBUS_DATA_BITS, SBUS_STOP_BITS, SBUS_PARITY);
+
+    // Turn off FIFO's - we want to do this character by character
+    uart_set_fifo_enabled(SBUS_UART_ID, false);
+
+    // Set up a RX interrupt
+    // We need to set up the handler first
+    // Select correct interrupt for the UART we are using
+    int UART_IRQ = SBUS_UART_ID == uart0 ? UART0_IRQ : UART1_IRQ;
+
+    // And set up and enable the interrupt handlers
+    irq_set_exclusive_handler(UART_IRQ, sbus_on_uart_rx);
+    irq_set_enabled(UART_IRQ, true);
+
+    // Now enable the UART to send interrupts - RX only
+    uart_set_irq_enables(SBUS_UART_ID, true, false);
+
 }
 
 bool hasSbusData()
