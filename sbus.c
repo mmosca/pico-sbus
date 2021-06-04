@@ -131,9 +131,6 @@ void sbus_init(uart_inst_t *uart, int rx_pin, int tx_pin)
     gpio_set_function(tx_pin, GPIO_FUNC_UART);
 
 
-    gpio_init(PICO_DEFAULT_LED_PIN);
-    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
-
     // Actually, we want a different speed
     // The call will return the actual baud rate selected, which will be as close as
     // possible to that requested
@@ -225,7 +222,5 @@ void sbus_on_uart_rx() {
             }
         }
     }
-
-    //gpio_put(PICO_DEFAULT_LED_PIN, 0);
 }
 

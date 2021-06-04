@@ -14,12 +14,21 @@ pico_sdk_init()
 add_executable(pico-sbus
 	pico-sbus.c
     sbus.c
+    sbus-hid.c
 )
 
-# enable usb output, disable uart output
-pico_enable_stdio_usb(pico-sbus 1)
-pico_enable_stdio_uart(pico-sbus 0)
+#add_compile_definitions(PICO_STDOUT_MUTEX)
 
-target_link_libraries(pico-sbus pico_stdlib)
+target_include_directories(pico-sbus PRIVATE ${CMAKE_CURRENT_LIST_DIR} .)
+
+# Stdio output usb/sbus
+pico_enable_stdio_usb(pico-sbus 0)
+pico_enable_stdio_uart(pico-sbus 1)
+
+target_link_libraries(pico-sbus 
+    pico_stdlib
+    pico_multicore
+    tinyusb_device
+    tinyusb_board)
 
 pico_add_extra_outputs(pico-sbus)
