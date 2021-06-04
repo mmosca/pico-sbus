@@ -4,12 +4,17 @@
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
 
+#include "bsp/board.h"
+
 #include "sbus.h"
 
 void hid_init()
 {
     gpio_init(PICO_DEFAULT_LED_PIN);
     gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+
+    board_init();
+    tusb_init();
 }
 
 void hid_main()
@@ -18,6 +23,9 @@ void hid_main()
 
     while(1)
     {
+        //tud_task(); // device task
+        //tuh_task(); // host task
+
         if(hasSbusData())
         {
             if(readSbusData(sbusData))
@@ -60,6 +68,8 @@ void hid_main()
         {
             //printf("%i BPS: %i No data! oldest: %i newest: %i\n", irq_count, actual, oldest, newest);
         }
+
+
         tight_loop_contents();
     }
 }
