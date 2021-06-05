@@ -9,6 +9,7 @@
 #define SBUS_HID_MAX 0x7FF
 
 #define SBUS_HID_LOW_TH (SBUS_HID_MAX / 3)
+#define SBUS_HID_MID_TH (1024)
 #define SBUS_HID_HIGH_TH (SBUS_HID_MAX - SBUS_HID_LOW_TH)
 
 typedef struct {

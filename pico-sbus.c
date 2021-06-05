@@ -10,23 +10,19 @@
 #include "sbus.h"
 #include "sbus-hid.h"
 
-extern volatile int irq_count;
-
-extern volatile uint8_t oldest;
-extern volatile uint8_t newest;
-extern volatile uint8_t stored;
-
-
 int main() {
     stdio_init_all();
+
+    // Initialize SBUS and setup interrupt to read data on core0
     sbus_init(SBUS_UART_ID, UART_RX_PIN, UART_TX_PIN);
+    
     hid_init();
 
+    // Proccess SBUS data and generate HID reports from core1
     multicore_launch_core1(hid_main);
 
     while (1)
     {
-
         tight_loop_contents();
     }
 }

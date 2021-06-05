@@ -8,67 +8,32 @@
 
 #include "sbus-hid.h"
 #include "sbus.h"
+#include "usb_descriptors.h"
 
 struct axis_button_mapping_t {
    int channel;
    int first_button; 
 } axis_button_mapping[] = {
-    {.channel = 4, .first_button = 0},
+    {4, 0},
     {6, 2},
-    {8, 5},
-    {9, 8},
-    {10, 11},
-    {11, 14},
-    {12, 17},
-    {13, 20},
-    {14, 23},
-    {15, 26},
+    {8, 4},
+    {9, 6},
+    {10, 8},
+    {11, 10},
+    {12, 12},
     {-1, -1}};
 
-joystick_button_t channel2button(uint16_t channelValue)
-{
-    if(channelValue < SBUS_HID_LOW_TH)
-    {
-        return BUTTON_LOW;
-    } else if(channelValue > SBUS_HID_HIGH_TH)
-    {
-        return BUTTON_HIGH;
-    }
+void hid_task(joystick_state_t *joy);
+joystick_button_t channel2button2(uint16_t channelValue);
+joystick_button_t channel2button3(uint16_t channelValue);
+void setJoyStickButton(joystick_state_t *joystick, int low_button, uint16_t channel_value);
+void sbus2joystick(const sbus_state_t *sbus, joystick_state_t *joystick);
+static void send_hid_report(uint8_t report_id, joystick_state_t *joy);
 
-    return BUTTON_MID;
-}
+uint8_t scaleAxis(uint16_t value);
 
-void setJoyStickButton(joystick_state_t *joystick, int low_button, uint16_t channel_value)
-{
-    int b = channel2button(channel_value);
-    joystick->buttons[low_button + b] = true;
-}
+static bool hasData = false;
 
-void sbus2joystick(const sbus_state_t *sbus, joystick_state_t *joystick)
-{
-    memset(joystick, 0, sizeof(joystick_state_t));
-
-    joystick->yr = sbus->ch[0];
-    joystick->xr = sbus->ch[1];
-    joystick->yl = sbus->ch[2];
-    joystick->xl = sbus->ch[3];
-    joystick->z = sbus->ch[5];
-    joystick->z_rot = sbus->ch[7];
-
-    for (int i = 0; axis_button_mapping[i].channel != -1; ++i)
-    {
-        setJoyStickButton(joystick, axis_button_mapping[i].first_button, sbus->ch[axis_button_mapping[i].channel]);
-    }
-
-    if (sbus->ch[16] > SBUS_HID_HIGH_TH)
-    {
-        joystick->buttons[29] = true;
-    }
-    if (sbus->ch[17] > SBUS_HID_HIGH_TH)
-    {
-        joystick->buttons[30] = true;
-    }
-}
 
 void hid_init()
 {
@@ -89,9 +54,9 @@ void hid_main()
     {
         tud_task(); // device task
 
-
         if(hasSbusData())
         {
+            hasData = true;
             /*
             printf("\033[2J");
             printf("\033[H");
@@ -123,16 +88,37 @@ void hid_main()
                     printf("Button %2i: %i\n", i + 1, joy.buttons[i]);
                 }
             }
-
-            sleep_ms(9);
         }
         else
         {
-            //printf("%i BPS: %i No data! oldest: %i newest: %i\n", irq_count, actual, oldest, newest);
+            hasData = 0;
         }
 
+        hid_task(&joy);
+    }
+}
 
-        tight_loop_contents();
+void hid_task(joystick_state_t *joy)
+{
+    // Poll every 10ms
+    const uint32_t interval_ms = 10;
+    static uint32_t start_ms = 0;
+
+    if (board_millis() - start_ms < interval_ms)
+        return; // not enough time
+    start_ms = board_millis();
+
+    // Remote wakeup
+    if (tud_suspended() && hasData)
+    {
+        // Wake up host if we are in suspend mode
+        // and REMOTE_WAKEUP feature is enabled by host
+        tud_remote_wakeup();
+    }
+    else
+    {
+        // Send the 1st of report chain, the rest will be sent by tud_hid_report_complete_cb()
+        send_hid_report(REPORT_ID_GAMEPAD, joy);
     }
 }
 
@@ -157,4 +143,110 @@ uint16_t tud_hid_get_report_cb(uint8_t instance, uint8_t report_id, hid_report_t
     (void) reqlen;
 
     return 0;
+}
+
+static void send_hid_report(uint8_t report_id, joystick_state_t *joy)
+{
+    // skip if hid is not ready yet
+    if (!tud_hid_ready())
+        return;
+
+    switch (report_id)
+    {
+        case REPORT_ID_GAMEPAD:
+        {
+            hid_gamepad_report_t report =
+                {
+                    .x = scaleAxis(joy->xl), 
+                    .y = scaleAxis(joy->yl), 
+                    .z = scaleAxis(joy->z), 
+                    .rz = scaleAxis(joy->z_rot), 
+                    .rx = scaleAxis(joy->xr), 
+                    .ry = scaleAxis(joy->yr), 
+                    .hat = 0, 
+                    .buttons = 0
+                };
+
+            for (int i = 0; i < SBUS_HID_MAX_BUTTONS && i < 16; ++i)
+            {
+                if (joy->buttons[i])
+                {
+                    report.buttons |= (1 << i);
+                }
+            }
+            tud_hid_report(REPORT_ID_GAMEPAD, &report, sizeof(report));
+        }
+        break;
+
+        default:
+            break;
+    }
+}
+
+joystick_button_t channel2button3(uint16_t channelValue)
+{
+    if(channelValue < SBUS_HID_LOW_TH)
+    {
+        return BUTTON_LOW;
+    } else if(channelValue > SBUS_HID_HIGH_TH)
+    {
+        return BUTTON_HIGH;
+    }
+
+    return BUTTON_MID;
+}
+
+joystick_button_t channel2button2(uint16_t channelValue)
+{
+    if(channelValue < SBUS_HID_MID_TH)
+    {
+        return BUTTON_LOW;
+    }
+
+    return BUTTON_MID;
+}
+
+void setJoyStickButton2(joystick_state_t *joystick, int low_button, uint16_t channel_value)
+{
+    int b = channel2button2(channel_value);
+    joystick->buttons[low_button + b] = true;
+}
+
+void setJoyStickButton3(joystick_state_t *joystick, int low_button, uint16_t channel_value)
+{
+    int b = channel2button3(channel_value);
+    joystick->buttons[low_button + b] = true;
+}
+
+void sbus2joystick(const sbus_state_t *sbus, joystick_state_t *joystick)
+{
+    memset(joystick, 0, sizeof(joystick_state_t));
+
+    joystick->xr = sbus->ch[0];
+    joystick->yr = sbus->ch[1];
+    joystick->yl = sbus->ch[2];
+    joystick->xl = sbus->ch[3];
+    joystick->z = sbus->ch[5];
+    joystick->z_rot = sbus->ch[7];
+
+    for (int i = 0; axis_button_mapping[i].channel != -1; ++i)
+    {
+        setJoyStickButton2(joystick, axis_button_mapping[i].first_button, sbus->ch[axis_button_mapping[i].channel]);
+    }
+
+    if (sbus->ch[16] > SBUS_HID_HIGH_TH)
+    {
+        joystick->buttons[14] = true;
+    }
+    if (sbus->ch[17] > SBUS_HID_HIGH_TH)
+    {
+        joystick->buttons[15] = true;
+    }
+}
+
+
+uint8_t scaleAxis(uint16_t value)
+{
+    // Just drop lower bits
+    return value >> 4;
 }
