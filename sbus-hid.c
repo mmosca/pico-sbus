@@ -30,7 +30,7 @@ void setJoyStickButton(joystick_state_t *joystick, int low_button, uint16_t chan
 void sbus2joystick(const sbus_state_t *sbus, joystick_state_t *joystick);
 static void send_hid_report(uint8_t report_id, joystick_state_t *joy);
 
-uint8_t scaleAxis(uint16_t value);
+int8_t scaleAxis(uint16_t value);
 
 static bool hasData = false;
 
@@ -245,10 +245,10 @@ void sbus2joystick(const sbus_state_t *sbus, joystick_state_t *joystick)
 }
 
 
-uint8_t scaleAxis(uint16_t value)
+int8_t scaleAxis(uint16_t value)
 {
-    // Just drop lower bits
-    return value >> 4;
-    // 3 should work, but windows goes crazy
-    //return value >> 3;
+    // Just drop lower bits 255-0
+    int16_t smallerValue = value >> 3;
+
+    return smallerValue - 127;
 }
