@@ -25,28 +25,29 @@ The channel map aims at being usefull for 6 channel radios while exposing as mos
 # Pinout
 The circuit can be powered by the PICO VBUS and 3V3(out) pins when plugged in USB.
 
-SBUS + = 5v (VBus from PICO pin 40)
-SBUS - = GND (from pico PIN 3, 8, 13, 18, 23, 28 or 38)
-SBUS Data = Inverter input (CD74HCT14E pin 1)
+## SBUS
+* SBUS + = 5v (VBus from PICO pin 40)
+* SBUS - = GND (from pico PIN 3, 8, 13, 18, 23, 28 or 38)
+* SBUS Data = Inverter input (CD74HCT14E pin 1)
 
-CD74HCT14E
-1 = SBUS Data
-2 = Inverted SBUS Data - Level Shifter Signal High side
-7 = GND (from pico PIN 3, 8, 13, 18, 23, 28 or 38)
-14 = 5v (VBus from PICO pin 40)
+## CD74HCT14E
+* 1 = SBUS Data
+* 2 = Inverted SBUS Data - Level Shifter Signal High side
+* 7 = GND (from pico PIN 3, 8, 13, 18, 23, 28 or 38)
+* 14 = 5v (VBus from PICO pin 40)
 
-Level Shifter (BOB-12009):
-HV1 = Inverted SBUS Data
-LV1 = Low level Inverted SBUS Data
-HV = 5v (VBus from PICO pin 40)
-LV = 3.3v (3V3(out) from PICO pin 36))
-GND = GND (from PICO PIN 3, 8, 13, 18, 23, 28 or 38)
+## Level Shifter (BOB-12009):
+* HV1 = Inverted SBUS Data
+* LV1 = Low level Inverted SBUS Data
+* HV = 5v (VBus from PICO pin 40)
+* LV = 3.3v (3V3(out) from PICO pin 36))
+* GND = GND (from PICO PIN 3, 8, 13, 18, 23, 28 or 38)
 
-Raspberry PICO:
-GP5 (pin7) = LV1 (3.3v low level inverted SBUS data)
-VBUS (pin40) = 5V 
-3v3(out) (pin 36)= 3.3v
-USB = Your PC :)
+## Raspberry PICO:
+* GP5 (pin7) = LV1 (3.3v low level inverted SBUS data)
+* VBUS (pin40) = 5V 
+* 3v3(out) (pin 36)= 3.3v
+* USB = Your PC :)
 
 
 # Notes
