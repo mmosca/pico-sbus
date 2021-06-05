@@ -15,6 +15,7 @@ add_executable(pico-sbus
 	pico-sbus.c
     sbus/sbus.c
     sbus-hid.c
+    usb_descriptors.c
 )
 
 #add_compile_definitions(PICO_STDOUT_MUTEX)
