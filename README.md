@@ -19,8 +19,9 @@ The channel map aims at being usefull for 6 channel radios while exposing as mos
 14. Button 15, 16, 17
 15. Button 18, 19, 20
 15. Button 21, 22, 23
-17. Button 24 (Digital ch1)
-18. Button 25 (Digital ch2)
+16. Button 24, 25, 26
+17. Button 27 (Digital ch1)
+18. Button 28 (Digital ch2)
 
 # Pinout
 The circuit can be powered by the PICO VBUS and 3V3(out) pins when plugged in USB.
