@@ -26,6 +26,8 @@ The channel map aims at being usefull for 6 channel radios while exposing as mos
 The circuit can be powered by the PICO VBUS and 3V3(out) pins when plugged in USB.
 
 ## SBUS
+Futaba servo connector: | - + D |_
+
 * SBUS + = 5v (VBus from PICO pin 40)
 * SBUS - = GND (from pico PIN 3, 8, 13, 18, 23, 28 or 38)
 * SBUS Data = Inverter input (CD74HCT14E pin 1)
