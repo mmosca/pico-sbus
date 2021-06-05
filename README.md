@@ -28,7 +28,7 @@ The channel map aims at being usefull for 6 channel radios while exposing as mos
 The circuit can be powered by the PICO VBUS and 3V3(out) pins when plugged in USB.
 
 ## Schematic with NPN transistor
-![NPN Inverter and logic level translator](docs/schematics.png)
+![NPN Inverter and logic level translator](https://raw.githubusercontent.com/mmosca/pico-sbus/main/docs/schematic.png)
 
 ## SBUS
 Futaba servo connector: | - + D |_
