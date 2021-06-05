@@ -25,24 +25,7 @@
 #define SBUS_FIFO_SIZE	2
 
 typedef struct {
-    uint16_t ch1;
-    uint16_t ch2;
-    uint16_t ch3;
-    uint16_t ch4;
-    uint16_t ch5;
-    uint16_t ch6;
-    uint16_t ch7;
-    uint16_t ch8;
-    uint16_t ch9;
-    uint16_t ch10;
-    uint16_t ch11;
-    uint16_t ch12;
-    uint16_t ch13;
-    uint16_t ch14;
-    uint16_t ch15;
-    uint16_t ch16;
-    bool dch17;
-    bool dch18;
+    uint16_t ch[18];
     bool framelost;
     bool failsafe;
 } sbus_state_t;

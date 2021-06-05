@@ -71,43 +71,11 @@ void decode_sbus_data(const uint8_t *data, sbus_state_t *decoded)
 
         assert(chData > 2048);
 
-        if(channel == 0) {
-            decoded->ch1 = chData;
-        } else if(channel == 1) {
-            decoded->ch2 = chData;
-        } else if(channel == 2) {
-            decoded->ch3 = chData;
-        } else if(channel == 3) {
-            decoded->ch4 = chData;
-        } else if(channel == 4) {
-            decoded->ch5 = chData;
-        } else if(channel == 5) {
-            decoded->ch6 = chData;
-        } else if(channel == 6) {
-            decoded->ch7 = chData;
-        } else if(channel == 7) {
-            decoded->ch8 = chData;
-        } else if(channel == 8) {
-            decoded->ch9 = chData;
-        } else if(channel == 9) {
-            decoded->ch10 = chData;
-        } else if(channel == 10) {
-            decoded->ch11 = chData;
-        } else if(channel == 11) {
-            decoded->ch12 = chData;
-        } else if(channel == 12) {
-            decoded->ch13 = chData;
-        } else if(channel == 13) {
-            decoded->ch14 = chData;
-        } else if(channel == 14) {
-            decoded->ch15 = chData;
-        } else if(channel == 15) {
-            decoded->ch16 = chData;
-        }
+        decoded->ch[channel] = chData;
     }
 
-    decoded->dch17 = data[23] & 1;
-    decoded->dch18 = data[23] & (1<<1);
+    decoded->ch[16] = data[23] & 1 ? 0x7FF : 0;
+    decoded->ch[17] = data[23] & (1<<1) ? 0x7FF : 0;
     decoded->framelost = data[23] & (1<<2);
     decoded->failsafe = data[23] & (1<<3);
 }
