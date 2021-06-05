@@ -249,4 +249,6 @@ uint8_t scaleAxis(uint16_t value)
 {
     // Just drop lower bits
     return value >> 4;
+    // 3 should work, but windows goes crazy
+    //return value >> 3;
 }
