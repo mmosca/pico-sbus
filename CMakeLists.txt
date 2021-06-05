@@ -13,13 +13,13 @@ pico_sdk_init()
 
 add_executable(pico-sbus
 	pico-sbus.c
-    sbus.c
+    sbus/sbus.c
     sbus-hid.c
 )
 
 #add_compile_definitions(PICO_STDOUT_MUTEX)
 
-target_include_directories(pico-sbus PRIVATE ${CMAKE_CURRENT_LIST_DIR} .)
+target_include_directories(pico-sbus PRIVATE ${CMAKE_CURRENT_LIST_DIR} . sbus)
 
 # Stdio output usb/sbus
 pico_enable_stdio_usb(pico-sbus 0)
