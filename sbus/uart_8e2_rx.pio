@@ -61,8 +61,8 @@ error_out:
 input1:
 
 good_stop:              ; No delay before returning to start; a little slack is
-    push                ; important in case the TX clock is slightly too fast.
     jmp x-- stopcheck
+    push                ; important in case the TX clock is slightly too fast.
 
 
 % c-sdk {
