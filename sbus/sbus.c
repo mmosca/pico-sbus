@@ -66,10 +66,6 @@ void decode_sbus_data(const uint8_t *data, sbus_state_t *decoded)
         uint8_t b2 = data[idx+1];
         uint8_t b3 = data[idx+2];
 
-        D(printf("Channel %i: %u | %u | %u\n", channel + 1, (b1 >> info->shift1), (b2 << info->shift2), (b3 << info->shift3)));
-        D(printf("Channel %i: %u , %u , %u\n", channel + 1, (info->shift1), (info->shift2), (info->shift3)));
-        D(printf("Channel %i: %u , %u , %u\n", channel + 1, b1, b2, b3));
-
         uint16_t chData = ((b1 >> info->shift1) | (b2 << info->shift2) | (b3 << info->shift3)) & 0x7FF;
 
         assert(chData > 2048);

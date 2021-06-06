@@ -64,6 +64,8 @@ void hid_main()
     uint8_t sbusData[SBUS_MESSAGE_MAX_SIZE] = {};
     joystick_state_t joy = {};
     int clear_counter = 0;
+    const uint32_t interval_ms = 500;
+    uint32_t start_ms = board_millis();
 
     while(1)
     {
@@ -72,6 +74,7 @@ void hid_main()
         if(hasSbusData())
         {
             hasData = true;
+            gpio_put(PICO_DEFAULT_LED_PIN, 1);
             /*
             printf("\033[2J");
             printf("\033[H");
@@ -80,32 +83,35 @@ void hid_main()
             if(readSbusData(sbusData))
             {
                 sbus_state_t sbus = {};
-                gpio_put(PICO_DEFAULT_LED_PIN, 0);
                 memset(&sbus, -1, sizeof(sbus_state_t));
-
 
                 decode_sbus_data(sbusData, &sbus);
                 sbus2joystick(&sbus, &joy);
 
-                for(int i = 0; i < 18; ++i)
-                {
-                    printf("Ch%2i: %04u\n", i, sbus.ch[i]);
-                }
-                printf("Frame lost: %i Failsafe: %i\n", sbus.framelost, sbus.failsafe);
-                gpio_put(PICO_DEFAULT_LED_PIN, 0);
+                if (board_millis() - start_ms > interval_ms) {
+                    start_ms = board_millis();
 
-                printf("Joy L: %i, %i\n", joy.xl, joy.yl);
-                printf("Joy R: %i, %i\n", joy.xr, joy.yr);
-                printf("Joy Z: %i, %i\n", joy.z, joy.z_rot);
+                    for(int i = 0; i < 18; ++i)
+                    {
+                        printf("Ch%2i: %04u\n", i, sbus.ch[i]);
+                    }
 
-                for (int i = 0; i < SBUS_HID_MAX_BUTTONS; ++i)
-                {
-                    printf("Button %2i: %i\n", i + 1, joy.buttons[i]);
+                    printf("Frame lost: %i Failsafe: %i\n", sbus.framelost, sbus.failsafe);
+
+                    printf("Joy L: %i, %i\n", joy.xl, joy.yl);
+                    printf("Joy R: %i, %i\n", joy.xr, joy.yr);
+                    printf("Joy Z: %i, %i\n", joy.z, joy.z_rot);
+
+                    for (int i = 0; i < SBUS_HID_MAX_BUTTONS; ++i)
+                    {
+                        printf("Button %2i: %i\n", i + 1, joy.buttons[i]);
+                    }
                 }
             }
         }
         else
         {
+            gpio_put(PICO_DEFAULT_LED_PIN, 0);
             hasData = 0;
         }
 
