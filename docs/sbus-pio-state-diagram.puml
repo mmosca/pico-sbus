@@ -1,0 +1,47 @@
+@startuml
+
+[*] --> WaitingStartBit
+WaitingStartBit --> ReadingDataBits
+WaitingStartBit : 3 instructions
+state ReadingDataBits {
+  
+  state pin_fork <<fork>>
+  [*] --> pin_fork : 1 instruction
+  pin_fork --> PinHigh
+  state y_fork <<fork>>
+  PinHigh --> y_fork
+  y_fork --> YZero
+  y_fork --> YOne
+
+  YZero --> [*]
+  YZero : 4 instructions
+  YOne --> [*]
+  YOne : 5 instructions
+
+  pin_fork --> PinLow : 1 instruction
+  PinLow : 2 instructions
+  
+  PinLow --> [*]
+  
+
+}
+ReadingDataBits --> ReadParityBit
+ReadingDataBits : Worst case 6 instructions
+state parity_fork <<fork>>
+state stop_fork <<fork>>
+
+ReadParityBit --> parity_fork
+ReadParityBit : 3 instructions
+parity_fork --> BadData
+parity_fork --> WaitForStopBits
+
+WaitForStopBits -> stop_fork
+stop_fork --> DataGood
+stop_fork --> BadData
+BadData --> [*]
+DataGood --> [*]
+DataGood : 4 instructions (with push)
+
+
+@enduml
+

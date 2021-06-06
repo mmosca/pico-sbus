@@ -46,15 +46,13 @@ parityx0:                ; x is already 0 after bitloop
 
 
 
-stop1check:
+stopcheck:
+    set x, 1
     jmp pin good_stop [6]  ; Check stop bit (should be high)
 
     irq 4 rel           ; Either a framing error or a break. Set a sticky flag,
     wait 1 pin 0        ; and wait for line to return to idle state.
     jmp start           ; Don't push data if we didn't see good framing.
-
-stop2check:
-    jmp pin good_stop   ; Check stop bit (should be high)
 
 error_out:
     irq 4 rel           ; Either a framing error or a break. Set a sticky flag,
@@ -64,6 +62,7 @@ input1:
 
 good_stop:              ; No delay before returning to start; a little slack is
     push                ; important in case the TX clock is slightly too fast.
+    jmp x-- stopcheck
 
 
 % c-sdk {
