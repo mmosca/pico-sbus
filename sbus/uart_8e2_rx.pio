@@ -1,0 +1,98 @@
+;
+; Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+
+.program uart_8e2_rx
+
+; Slightly more fleshed-out 8n1 UART receiver which handles framing errors and
+; break conditions more gracefully.
+; IN pin 0 and JMP pin are both mapped to the GPIO used as UART RX.
+
+start:
+    wait 0 pin 0        ; Stall until start bit is asserted
+    set y, 0            ; Initialize parity, 0 for Even, 1 for Odd
+    ;set isr, 0          ; clear isr
+    set x, 7    [10]    ; Preload bit counter, then delay until halfway through
+bitloop:                ; the first data bit (12 cycles incl wait, set).
+    jmp pin doparity    ; If pin is 0, parity will not change, skip it
+    jmp skipparity      ; If pin is 0, parity will not change, skip it
+doparity:
+                        ;     PIN, PARITY
+    jmp !y parity1      ; XOR:  1, 0 = 1
+    set y, 0            ; XOR:  1, 1 = 0
+    jmp paritydone
+
+parity1:
+    set y, 1 [1]        ; Set parity 0, wait 1 extra cycle to account for jump in other path
+paritydone:
+    in pins, 1
+    jmp x-- bitloop [6]
+
+noflip: ; parity value is current
+
+skipparity:
+    in pins, 1          ; Shift data bit into ISR
+    jmp x-- bitloop [6] ; Loop 8 times, each loop iteration is 8 cycles
+
+paritycheck:
+    jmp pin parityx1    ; parity received is 1
+    jmp parityx0
+parityx1:
+    set x, 1             ; parity received is 1
+parityx0:                ; x is already 0 after bitloop
+    jmp x!=y error_out   ; Parity error
+
+
+
+stop1check:
+    jmp pin good_stop [6]  ; Check stop bit (should be high)
+
+    irq 4 rel           ; Either a framing error or a break. Set a sticky flag,
+    wait 1 pin 0        ; and wait for line to return to idle state.
+    jmp start           ; Don't push data if we didn't see good framing.
+
+stop2check:
+    jmp pin good_stop   ; Check stop bit (should be high)
+
+error_out:
+    irq 4 rel           ; Either a framing error or a break. Set a sticky flag,
+    wait 1 pin 0        ; and wait for line to return to idle state.
+    jmp start           ; Don't push data if we didn't see good framing.
+input1:
+
+good_stop:              ; No delay before returning to start; a little slack is
+    push                ; important in case the TX clock is slightly too fast.
+
+
+% c-sdk {
+static inline void uart_8e2_rx_program_init(PIO pio, uint sm, uint offset, uint pin, uint baud) {
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, false);
+    pio_gpio_init(pio, pin);
+    gpio_pull_up(pin);
+
+    pio_sm_config c = uart_8e2_rx_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, pin); // for WAIT, IN
+    sm_config_set_jmp_pin(&c, pin); // for JMP
+    // Shift to right, autopull disabled
+    sm_config_set_in_shift(&c, true, false, 32);
+    // Deeper FIFO as we're not doing any TX
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+    // SM transmits 1 bit per 8 execution cycles.
+    float div = (float)clock_get_hz(clk_sys) / (8 * baud);
+    sm_config_set_clkdiv(&c, div);
+    
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+
+static inline char uart_8e2_rx_program_getc(PIO pio, uint sm) {
+    // 8-bit read from the uppermost byte of the FIFO, as data is left-justified
+    io_rw_8 *rxfifo_shift = (io_rw_8*)&pio->rxf[sm] + 3;
+    while (pio_sm_is_rx_fifo_empty(pio, sm))
+        tight_loop_contents();
+    return (char)*rxfifo_shift;
+}
+
+%}

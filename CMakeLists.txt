@@ -18,6 +18,8 @@ add_executable(pico-sbus
     usb_descriptors.c
 )
 
+pico_generate_pio_header(pico-sbus ${CMAKE_CURRENT_LIST_DIR}/sbus/uart_8e2_rx.pio)
+
 #add_compile_definitions(PICO_STDOUT_MUTEX)
 
 target_include_directories(pico-sbus PRIVATE ${CMAKE_CURRENT_LIST_DIR} . sbus)
@@ -30,6 +32,7 @@ target_link_libraries(pico-sbus
     pico_stdlib
     pico_multicore
     tinyusb_device
-    tinyusb_board)
+    tinyusb_board
+    hardware_pio)
 
 pico_add_extra_outputs(pico-sbus)
