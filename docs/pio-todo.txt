@@ -1,0 +1,3 @@
+* validate timings
+* test
+* Create a version that does not require signal inversion for ultimate bom simplicity
