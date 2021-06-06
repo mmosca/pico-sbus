@@ -20,6 +20,9 @@ volatile uint8_t stored = 0;
 volatile int sbus_index = 0;
 volatile bool hasStartByte = false;
 
+
+static uart_inst_t *sbus_uart_id;
+
 critical_section_t fifo_lock;
 
 //#define DEBUG
@@ -80,8 +83,10 @@ void decode_sbus_data(const uint8_t *data, sbus_state_t *decoded)
     decoded->failsafe = data[23] & (1<<3);
 }
 
+
 void sbus_init(uart_inst_t *uart, int rx_pin, int tx_pin)
 {
+    sbus_uart_id = uart;
     // init mutex
     critical_section_init(&fifo_lock);
     // clear fifo
@@ -91,7 +96,7 @@ void sbus_init(uart_inst_t *uart, int rx_pin, int tx_pin)
     }
     oldest = newest = stored = 0;
 
-    uart_init(SBUS_UART_ID, 115200);
+    uart_init(uart, 115200);
 
     // Set the TX and RX pins by using the function select on the GPIO
     // Set datasheet for more information on function select
@@ -102,30 +107,30 @@ void sbus_init(uart_inst_t *uart, int rx_pin, int tx_pin)
     // Actually, we want a different speed
     // The call will return the actual baud rate selected, which will be as close as
     // possible to that requested
-    int actual = uart_set_baudrate(SBUS_UART_ID, SBUS_BAUD_RATE);
+    int actual = uart_set_baudrate(uart, SBUS_BAUD_RATE);
 
     printf("Actual baud rate: %i\n", actual);
 
     // Set UART flow control CTS/RTS, we don't want these, so turn them off
-    uart_set_hw_flow(SBUS_UART_ID, false, false);
+    uart_set_hw_flow(uart, false, false);
 
     // Set our data format
-    uart_set_format(SBUS_UART_ID, SBUS_DATA_BITS, SBUS_STOP_BITS, SBUS_PARITY);
+    uart_set_format(uart, SBUS_DATA_BITS, SBUS_STOP_BITS, SBUS_PARITY);
 
     // Turn off FIFO's - we want to do this character by character
-    uart_set_fifo_enabled(SBUS_UART_ID, false);
+    uart_set_fifo_enabled(uart, false);
 
     // Set up a RX interrupt
     // We need to set up the handler first
     // Select correct interrupt for the UART we are using
-    int UART_IRQ = SBUS_UART_ID == uart0 ? UART0_IRQ : UART1_IRQ;
+    int UART_IRQ = uart == uart0 ? UART0_IRQ : UART1_IRQ;
 
     // And set up and enable the interrupt handlers
     irq_set_exclusive_handler(UART_IRQ, sbus_on_uart_rx);
     irq_set_enabled(UART_IRQ, true);
 
     // Now enable the UART to send interrupts - RX only
-    uart_set_irq_enables(SBUS_UART_ID, true, false);
+    uart_set_irq_enables(uart, true, false);
 
 }
 
@@ -154,8 +159,8 @@ bool readSbusData(uint8_t *data)
 // Do not print or wait
 void sbus_on_uart_rx() {
     irq_count++;
-    while (uart_is_readable(SBUS_UART_ID)) {
-        uint8_t ch = uart_getc(SBUS_UART_ID);
+    while (uart_is_readable(sbus_uart_id)) {
+        uint8_t ch = uart_getc(sbus_uart_id);
         if(!hasStartByte && ch != SBUS_STARTBYTE)
         {
             continue;
