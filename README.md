@@ -3,12 +3,14 @@
 Turn your RC radio into a controller for your PC.
 
 ## Channel mapping
-The channel map aims at being usefull for 6 channel radios while exposing as most functionality as possible.
+The channel map aims at being usefull for 6 channel radios while exposing as much functionality as possible.
+
+You should create a new model on your radio and make sure you assign channels based on the mapping bellow.
 
 1. Stick R Y
 2. Stick R X
-3. Stick L Y
-4. Stick L X
+3. Stick L Y (Y Rotation)
+4. Stick L X (X Rotation)
 5. Button 1, 2 (Low, Max)
 6. Z
 7. Button 3,4

@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#define SBUS_HID_MAX_BUTTONS 31
+#define SBUS_HID_MAX_BUTTONS 16
 
 #define SBUS_HID_MIN 0
 #define SBUS_HID_MAX 0x7FF
