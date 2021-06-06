@@ -29,6 +29,7 @@ pico_enable_stdio_uart(pico-sbus 1)
 target_link_libraries(pico-sbus 
     pico_stdlib
     pico_multicore
+    pico_unique_id
     tinyusb_device
     tinyusb_board)
 

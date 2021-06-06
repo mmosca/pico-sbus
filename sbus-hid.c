@@ -3,6 +3,7 @@
 #include "tusb.h"
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
+#include "pico/unique_id.h"
 
 #include "bsp/board.h"
 
@@ -23,6 +24,9 @@ struct axis_button_mapping_t {
     {12, 12},
     {-1, -1}};
 
+ extern char const* string_desc_arr [];
+ static char pico_id_str[(PICO_UNIQUE_BOARD_ID_SIZE_BYTES * 2) + 1] ;
+
 void hid_task(joystick_state_t *joy);
 joystick_button_t channel2button2(uint16_t channelValue);
 joystick_button_t channel2button3(uint16_t channelValue);
@@ -39,6 +43,17 @@ void hid_init()
 {
     gpio_init(PICO_DEFAULT_LED_PIN);
     gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+
+  // read pico board id for SN
+   pico_unique_board_id_t id;
+   pico_get_unique_board_id(&id);
+
+   for(int i = 0; i < PICO_UNIQUE_BOARD_ID_SIZE_BYTES; ++i)
+   {
+       snprintf(pico_id_str + (i*2), 3, "%02x", id.id[i]);
+   }
+
+   string_desc_arr[3] = pico_id_str;
 
     board_init();
     tusb_init();
