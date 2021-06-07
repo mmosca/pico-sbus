@@ -1,4 +1,5 @@
 #ifndef __SBUS_H__
+#define __SBUS_H__
 
 #include <stdint.h>
 #include <stdbool.h>

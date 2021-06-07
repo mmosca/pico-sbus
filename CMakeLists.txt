@@ -15,6 +15,7 @@ add_executable(pico-sbus
 	pico-sbus.c
     sbus/sbus.c
     sbus-hid.c
+    input-mapping.c
     usb_descriptors.c
 )
 
