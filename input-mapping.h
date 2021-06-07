@@ -1,12 +1,16 @@
 #ifndef __INPUT_MAPPING_H__
 #define __INPUT_MAPPING_H__
 
-#define INPUT_MAX_BUTTONS 16
-
 #include <stdint.h>
 
 #include "tusb.h"
 #include "sbus.h"
+
+#ifndef CFG_TUD_MAX_BUTTONS
+#define INPUT_MAX_BUTTONS 16
+#else
+#define INPUT_MAX_BUTTONS CFG_TUD_MAX_BUTTONS
+#endif
 
 typedef enum input_button_type {
     BUTTON_NONE = 0,
@@ -25,8 +29,8 @@ typedef struct {
 #define INPUT_DEFAULT_XL 3
 #define INPUT_DEFAULT_YL 2
 
-#define INPUT_DEFAULT_XR 1
-#define INPUT_DEFAULT_YR 0
+#define INPUT_DEFAULT_XR 0
+#define INPUT_DEFAULT_YR 1
 
 #define INPUT_DEFAULT_Z  5
 #define INPUT_DEFAULT_ZR 7

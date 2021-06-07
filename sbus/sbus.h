@@ -23,10 +23,12 @@
 #define SBUS_CHANNEL_BIT_MASK   0x7FF
 #define SBUS_CHANNEL_BIT_MASK_NO_FIRST_BIT (SBUS_CHANNEL_BITS & ~1)
 
+#define SBUS_CHANNEL_COUNT 18
+
 #define SBUS_FIFO_SIZE	2
 
 typedef struct {
-    uint16_t ch[18];
+    uint16_t ch[SBUS_CHANNEL_COUNT];
     bool framelost;
     bool failsafe;
 } sbus_state_t;

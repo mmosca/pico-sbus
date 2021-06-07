@@ -2,6 +2,12 @@
 
 #include <string.h>
 
+#if INPUT_MAX_BUTTONS > 16
+  #define B32(X) (X)
+#else
+  #define B32(X)
+#endif
+
 void get_input_map(input_map_t *map)
 {
     memset(map, 0, sizeof(input_map_t));
@@ -18,31 +24,40 @@ void get_input_map(input_map_t *map)
     int bttn=0;
 
     map->button_map[bttn].channel = 4;
-    map->button_map[bttn++].type = BUTTON_2POS_LOW;
+    map->button_map[bttn++].type = BUTTON_3POS_LOW;
+
+    B32(map->button_map[bttn].channel = 4);
+    B32(map->button_map[bttn++].type = BUTTON_3POS_MID);
 
     map->button_map[bttn].channel = 4;
-    map->button_map[bttn++].type = BUTTON_2POS_HIGH;
+    map->button_map[bttn++].type = BUTTON_3POS_HIGH;
 
     map->button_map[bttn].channel = 6;
-    map->button_map[bttn++].type = BUTTON_2POS_LOW;
+    map->button_map[bttn++].type = BUTTON_3POS_LOW;
+
+    B32(map->button_map[bttn].channel = 6);
+    B32(map->button_map[bttn++].type = BUTTON_3POS_MID);
 
     map->button_map[bttn].channel = 6;
-    map->button_map[bttn++].type = BUTTON_2POS_HIGH;
+    map->button_map[bttn++].type = BUTTON_3POS_HIGH;
 
     // last 2 channels are the digital channels
-    for(int channel = 8; bttn < INPUT_MAX_BUTTONS - 2; channel++)
+    for (int channel = 8; bttn < (CFG_TUD_MAX_BUTTONS - 2) && channel < (SBUS_CHANNEL_COUNT - 2); channel++)
     {
         map->button_map[bttn].channel = channel;
-        map->button_map[bttn++].type = BUTTON_2POS_LOW;
+        map->button_map[bttn++].type = BUTTON_3POS_LOW;
+
+        B32(map->button_map[bttn].channel = channel);
+        B32(map->button_map[bttn++].type = BUTTON_3POS_MID);
 
         map->button_map[bttn].channel = channel;
-        map->button_map[bttn++].type = BUTTON_2POS_HIGH;
+        map->button_map[bttn++].type = BUTTON_3POS_HIGH;
     }
 
-    map->button_map[bttn].channel = 16;
+    map->button_map[bttn].channel = SBUS_CHANNEL_COUNT - 2;
     map->button_map[bttn++].type = BUTTON_2POS_HIGH;
 
-    map->button_map[bttn].channel = 17;
+    map->button_map[bttn].channel = SBUS_CHANNEL_COUNT -1;
     map->button_map[bttn++].type = BUTTON_2POS_HIGH;
 }
 
