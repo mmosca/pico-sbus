@@ -36,9 +36,6 @@ static void send_hid_report(uint8_t report_id, const sbus_state_t *sbus);
 
 int8_t scaleAxis(uint16_t value);
 
-static bool hasData = false;
-
-
 void hid_init()
 {
     gpio_init(PICO_DEFAULT_LED_PIN);
@@ -75,7 +72,6 @@ void hid_main()
 
         if(hasSbusData())
         {
-            hasData = true;
             /*
             printf("\033[2J");
             printf("\033[H");
@@ -103,10 +99,10 @@ void hid_main()
         else
         {
             gpio_put(PICO_DEFAULT_LED_PIN, 0);
-            hasData = 0;
         }
 
         hid_task((const sbus_state_t *)&sbus);
+        sbus.framelost = 1;
     }
 }
 
@@ -120,17 +116,20 @@ void hid_task(const sbus_state_t *sbus)
         return; // not enough time
     start_ms = board_millis();
 
-    // Remote wakeup
-    if (tud_suspended() && hasData && !sbus->framelost)
+    if(!sbus->framelost)
     {
-        // Wake up host if we are in suspend mode
-        // and REMOTE_WAKEUP feature is enabled by host
-        tud_remote_wakeup();
-    }
-    else
-    {
-        // Send the 1st of report chain, the rest will be sent by tud_hid_report_complete_cb()
-        send_hid_report(REPORT_ID_GAMEPAD, sbus);
+        // Remote wakeup
+        if (tud_suspended())
+        {
+            // Wake up host if we are in suspend mode
+            // and REMOTE_WAKEUP feature is enabled by host
+            tud_remote_wakeup();
+        }
+        else
+        {
+            // Send the 1st of report chain, the rest will be sent by tud_hid_report_complete_cb()
+            send_hid_report(REPORT_ID_GAMEPAD, sbus);
+        }
     }
 }
 
@@ -167,7 +166,9 @@ static void send_hid_report(uint8_t report_id, const sbus_state_t *sbus)
     {
         case REPORT_ID_GAMEPAD:
         {
-            hid_gamepad_report_t report =
+            if(!sbus->framelost)
+            {
+                hid_gamepad_report_t report =
                 {
                     .x = getAxisFromSbus(sbus, input_map.lx),
                     .y = getAxisFromSbus(sbus, input_map.ly),
@@ -178,14 +179,15 @@ static void send_hid_report(uint8_t report_id, const sbus_state_t *sbus)
                     .hat = 0,
                     .buttons = 0};
 
-            for (int i = 0; i < CFG_TUD_MAX_BUTTONS; ++i)
-            {
-                if (isPressed(sbus, &input_map.button_map[i]))
+                for (int i = 0; i < CFG_TUD_MAX_BUTTONS; ++i)
                 {
-                    report.buttons |= (1 << i);
+                    if (isPressed(sbus, &input_map.button_map[i]))
+                    {
+                        report.buttons |= (1 << i);
+                    }
                 }
+                tud_hid_report(REPORT_ID_GAMEPAD, &report, sizeof(report));
             }
-            tud_hid_report(REPORT_ID_GAMEPAD, &report, sizeof(report));
         }
         break;
 
