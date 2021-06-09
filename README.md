@@ -3,28 +3,27 @@
 Turn your RC radio into a controller for your PC.
 
 ## Channel mapping
-The channel map aims at being usefull for 6 channel radios while exposing as much functionality as possible.
+The default channel map aims at being usefull for 6 channel radios while exposing as much functionality as possible.
 
-You should create a new model on your radio and make sure you assign channels based on the mapping bellow.
-
+Channel - Function
 1. Stick R Y
 2. Stick R X
 3. Stick L Y (Y Rotation)
 4. Stick L X (X Rotation)
-5. Button 1, 2 (Low, Max)
+5. Button 1, 2, 3 (Low, Mid, Max)
 6. Z
-7. Button 3,4
+7. Button 4, 5, 6
 8. Z rotation
-9. Button 5,6
-10. Button 7,8
-11. Button 9, 10
-12. Button 11, 12
-13. Button 13, 14
-14. -
-15. -
-16. -
-17. Button 15 (Digital ch1)
-18. Button 16 (Digital ch2)
+9. Button 7, 8, 9
+10. Button 10, 11, 12
+11. Button 13, 14, 15
+12. Button 16, 17, 18
+13. Button 19, 20, 21
+14. Button 22, 23, 24
+15. Button 25, 26, 27
+16. Button 28, 29, 30
+17. Button 31 (Digital ch1)
+18. Button 32 (Digital ch2)
 
 # Pinout
 The circuit can be powered by the PICO VBUS and 3V3(out) pins when plugged in USB.
