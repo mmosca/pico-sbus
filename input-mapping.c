@@ -42,7 +42,7 @@ void get_input_map(input_map_t *map)
     map->button_map[bttn++].type = BUTTON_3POS_HIGH;
 
     // last 2 channels are the digital channels
-    for (int channel = 8; bttn < (CFG_TUD_MAX_BUTTONS - 2) && channel < (SBUS_CHANNEL_COUNT - 2); channel++)
+    for (int channel = 8; bttn < (INPUT_MAX_BUTTONS - 2) && channel < (SBUS_CHANNEL_COUNT - 2); channel++)
     {
         map->button_map[bttn].channel = channel;
         map->button_map[bttn++].type = BUTTON_3POS_LOW;
@@ -59,6 +59,17 @@ void get_input_map(input_map_t *map)
 
     map->button_map[bttn].channel = SBUS_CHANNEL_COUNT -1;
     map->button_map[bttn++].type = BUTTON_2POS_HIGH;
+}
+
+
+bool parse_input_map(uint8_t *data, size_t data_size, input_map_t *newMap)
+{
+    if(data_size != sizeof(input_map_t))
+    {
+        get_input_map(newMap);
+    }
+
+    memcpy(newMap, data, sizeof(input_map_t));
 }
 
 uint8_t getAxisFromSbus(const sbus_state_t *sbus, int channel)
@@ -84,6 +95,8 @@ bool isPressed(const sbus_state_t *sbus, const input_button_mapping_item_t *map)
             return rawValue >= 682 && rawValue < 1365;
         case BUTTON_3POS_HIGH:
             return rawValue >= 1365;
+        case BUTTON_NONE:
+            return false;
     }
 
     return false;

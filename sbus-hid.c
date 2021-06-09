@@ -13,7 +13,6 @@
 
 #include "input-mapping.h"
 
-
 static input_map_t input_map = {};
 struct axis_button_mapping_t {
    int channel;
@@ -141,6 +140,14 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_
     (void) report_type;
     (void) buffer;
     (void) bufsize;
+
+    if(report_id == 0 && report_type == 0)
+    {
+        if(buffer[0] == 0x1F)
+        {
+
+        }
+    }
 }
 
 // Invoked when received GET_REPORT control request
@@ -179,7 +186,7 @@ static void send_hid_report(uint8_t report_id, const sbus_state_t *sbus)
                     .hat = 0,
                     .buttons = 0};
 
-                for (int i = 0; i < CFG_TUD_MAX_BUTTONS; ++i)
+                for (int i = 0; i < INPUT_MAX_BUTTONS; ++i)
                 {
                     if (isPressed(sbus, &input_map.button_map[i]))
                     {

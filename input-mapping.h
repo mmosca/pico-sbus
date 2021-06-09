@@ -6,11 +6,7 @@
 #include "tusb.h"
 #include "sbus.h"
 
-#ifndef CFG_TUD_MAX_BUTTONS
-#define INPUT_MAX_BUTTONS 16
-#else
-#define INPUT_MAX_BUTTONS CFG_TUD_MAX_BUTTONS
-#endif
+#define INPUT_MAX_BUTTONS 32
 
 typedef enum input_button_type {
     BUTTON_NONE = 0,
@@ -49,9 +45,12 @@ typedef struct {
 
 void get_input_map(input_map_t *);
 
+bool parse_input_map(uint8_t *data, size_t data_size, input_map_t *newMap);
+
 uint8_t getAxisFromSbus(const sbus_state_t *sbus, int channel);
 bool isPressed(const sbus_state_t *sbus, const input_button_mapping_item_t *map);
 
 void sbus2gamepad_report(const input_map_t *map, const sbus_state_t *sbus, hid_gamepad_report_t *hid);
+
 
 #endif
