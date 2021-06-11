@@ -27,8 +27,9 @@ struct axis_button_mapping_t {
     {12, 12},
     {-1, -1}};
 
+#define PICO_ID_LEN ((PICO_UNIQUE_BOARD_ID_SIZE_BYTES * 2) + 1)
  extern char const* string_desc_arr [];
- static char pico_id_str[(PICO_UNIQUE_BOARD_ID_SIZE_BYTES * 2) + 1] ;
+ static char pico_id_str[PICO_ID_LEN];
 
 void hid_task(const sbus_state_t *sbus);
 static void send_hid_report(uint8_t report_id, const sbus_state_t *sbus);
@@ -42,14 +43,9 @@ void hid_init()
 
     // read pico board id for SN
     pico_unique_board_id_t id;
-    pico_get_unique_board_id(&id);
+    pico_get_unique_board_id_string(pico_id_str, PICO_ID_LEN);
 
     get_input_map(&input_map);
-
-    for (int i = 0; i < PICO_UNIQUE_BOARD_ID_SIZE_BYTES; ++i)
-    {
-        snprintf(pico_id_str + (i * 2), 3, "%02x", id.id[i]);
-    }
 
     string_desc_arr[3] = pico_id_str;
 

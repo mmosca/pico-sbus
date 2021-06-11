@@ -19,6 +19,8 @@ add_executable(pico-sbus
     usb_descriptors.c
 )
 
+pico_set_binary_type(pico-sbus no_flash)
+
 #add_compile_definitions(PICO_STDOUT_MUTEX)
 
 target_include_directories(pico-sbus PRIVATE ${CMAKE_CURRENT_LIST_DIR} . sbus)
@@ -30,6 +32,8 @@ pico_enable_stdio_uart(pico-sbus 1)
 target_link_libraries(pico-sbus 
     pico_stdlib
     pico_multicore
+    pico_divider
+    pico_mem_ops
     pico_unique_id
     tinyusb_device
     tinyusb_board)

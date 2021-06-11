@@ -31,7 +31,7 @@ typedef struct {
 #define INPUT_DEFAULT_Z  5
 #define INPUT_DEFAULT_ZR 7
 
-typedef struct {
+typedef struct __attribute__((__packed__)) {
     // Axis channel numbers 0-17
     uint8_t lx;
     uint8_t ly;
