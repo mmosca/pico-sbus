@@ -170,7 +170,8 @@ void sbus_on_uart_rx() {
             hasStartByte = false;
             sbus_index = 0;
 
-            if(current_sbus_data[SBUS_MESSAGE_MAX_SIZE - 1] == SBUS_ENDBYTE)
+            if(current_sbus_data[SBUS_MESSAGE_MAX_SIZE - 1] == SBUS_ENDBYTE ||
+                (current_sbus_data[SBUS_MESSAGE_MAX_SIZE - 1] & SBUS2_ENDBYTE_MASK) == SBUS2_ENDBYTE)
             {
                 critical_section_enter_blocking(&fifo_lock);
                 uint8_t nextNewest = (newest + 1) % SBUS_FIFO_SIZE;
