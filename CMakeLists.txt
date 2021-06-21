@@ -19,7 +19,7 @@ add_executable(pico-sbus
     usb_descriptors.c
 )
 
-pico_set_binary_type(pico-sbus no_flash)
+#pico_set_binary_type(pico-sbus no_flash)
 
 #add_compile_definitions(PICO_STDOUT_MUTEX)
 
