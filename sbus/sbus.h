@@ -1,4 +1,5 @@
 #ifndef __SBUS_H__
+#define __SBUS_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -19,14 +20,18 @@
 
 #define SBUS_STARTBYTE	0x0F
 #define SBUS_ENDBYTE	0X00
+#define SBUS2_ENDBYTE_MASK	0X0F
+#define SBUS2_ENDBYTE	0X04
 #define SBUS_MESSAGE_MAX_SIZE 25
 #define SBUS_CHANNEL_BIT_MASK   0x7FF
 #define SBUS_CHANNEL_BIT_MASK_NO_FIRST_BIT (SBUS_CHANNEL_BITS & ~1)
 
+#define SBUS_CHANNEL_COUNT 18
+
 #define SBUS_FIFO_SIZE	2
 
 typedef struct {
-    uint16_t ch[18];
+    uint16_t ch[SBUS_CHANNEL_COUNT];
     bool framelost;
     bool failsafe;
 } sbus_state_t;

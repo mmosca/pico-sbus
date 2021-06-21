@@ -15,10 +15,13 @@ add_executable(pico-sbus
 	pico-sbus.c
     sbus/sbus.c
     sbus-hid.c
+    input-mapping.c
     usb_descriptors.c
 )
 
 pico_generate_pio_header(pico-sbus ${CMAKE_CURRENT_LIST_DIR}/sbus/uart_8e2_rx.pio)
+
+#pico_set_binary_type(pico-sbus no_flash)
 
 #add_compile_definitions(PICO_STDOUT_MUTEX)
 
@@ -31,6 +34,9 @@ pico_enable_stdio_uart(pico-sbus 1)
 target_link_libraries(pico-sbus 
     pico_stdlib
     pico_multicore
+    pico_divider
+    pico_mem_ops
+    pico_unique_id
     tinyusb_device
     tinyusb_board
     hardware_pio)
