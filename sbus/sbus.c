@@ -10,6 +10,8 @@
 #include "hardware/irq.h"
 #include "pico/sync.h"
 
+#include "uart_8e2_rx.pio.h"
+
 volatile int irq_count = 0;
 
 volatile uint8_t sbus_data[SBUS_FIFO_SIZE][SBUS_MESSAGE_MAX_SIZE];

@@ -6,18 +6,22 @@
 
 .program uart_8e2_rx
 
+.side_set 1 opt
+
 ; Slightly more fleshed-out 8n1 UART receiver which handles framing errors and
 ; break conditions more gracefully.
 ; IN pin 0 and JMP pin are both mapped to the GPIO used as UART RX.
 
 start:
-    wait 0 pin 0        ; Stall until start bit is asserted
-    set y, 0            ; Initialize parity, 0 for Even, 1 for Odd
-    ;set isr, 0          ; clear isr
-    set x, 7    [10]    ; Preload bit counter, then delay until halfway through
-bitloop:                ; the first data bit (12 cycles incl wait, set).
-    jmp pin doparity    ; If pin is 0, parity will not change, skip it
-    jmp skipparity      ; If pin is 0, parity will not change, skip it
+    wait 0 pin 0  side 0  ; Stall until start bit is asserted
+    set y, 0              ; Initialize parity, 0 for Even, 1 for Odd
+    ;set isr, 0           ; clear isr
+    set x, 7   [7]        ; Preload bit counter, then delay until halfway through
+    set x, 7   [2]        ; Original code has 10 delay for set x, 7. .side_set
+                          ; limits the max delay to 7. Use a noop + delay 2
+bitloop:                  ; the first data bit (12 cycles incl wait, set).
+    jmp pin doparity      ; If pin is 0, parity will not change, skip it
+    jmp skipparity        ; If pin is 0, parity will not change, skip it
 doparity:
                         ;     PIN, PARITY
     jmp !y parity1      ; XOR:  1, 0 = 1
@@ -25,16 +29,16 @@ doparity:
     jmp paritydone
 
 parity1:
-    set y, 1 [1]        ; Set parity 0, wait 1 extra cycle to account for jump in other path
+    set y, 1 [1]         ; Set parity 0, wait 1 extra cycle to account for jump in other path
 paritydone:
-    in pins, 1
-    jmp x-- bitloop [6]
+    in pins, 1    side 1 ;
+    jmp x-- bitloop side 0 [6]
 
 noflip: ; parity value is current
 
 skipparity:
-    in pins, 1          ; Shift data bit into ISR
-    jmp x-- bitloop [6] ; Loop 8 times, each loop iteration is 8 cycles
+    in pins, 1   side 1        ; Shift data bit into ISR
+    jmp x-- bitloop side 0 [6] ; Loop 8 times, each loop iteration is 8 cycles
 
 paritycheck:
     jmp pin parityx1    ; parity received is 1
@@ -66,14 +70,20 @@ good_stop:              ; No delay before returning to start; a little slack is
 
 
 % c-sdk {
-static inline void uart_8e2_rx_program_init(PIO pio, uint sm, uint offset, uint pin, uint baud) {
+#include "hardware/clocks.h"
+#include "hardware/gpio.h"
+
+static inline void uart_8e2_rx_program_init(PIO pio, uint sm, uint offset, uint pin, uint baud, uint dbg_pin) {
     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, false);
+
     pio_gpio_init(pio, pin);
     gpio_pull_up(pin);
 
     pio_sm_config c = uart_8e2_rx_program_get_default_config(offset);
     sm_config_set_in_pins(&c, pin); // for WAIT, IN
     sm_config_set_jmp_pin(&c, pin); // for JMP
+    sm_config_set_sideset_pins(&c, dbg_pin);
+
     // Shift to right, autopull disabled
     sm_config_set_in_shift(&c, true, false, 32);
     // Deeper FIFO as we're not doing any TX
