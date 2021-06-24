@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "hardware/uart.h"
+#include "hardware/pio.h"
 
 #define SBUS_UART_ID uart1
 
@@ -45,5 +46,6 @@ void sbus_on_uart_rx();
 void decode_sbus_data(const uint8_t *data, sbus_state_t *decoded);
 
 void sbus_init(uart_inst_t *uart, int rx_pin, int tx_pin);
+void sbus_pio_init(PIO pio, int rx_pin, int dbg_pin);
 
 #endif

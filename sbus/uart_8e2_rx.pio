@@ -67,6 +67,7 @@ input1:
 good_stop:              ; No delay before returning to start; a little slack is
     jmp x-- stopcheck
     push                ; important in case the TX clock is slightly too fast.
+    irq set 0 rel
 
 
 % c-sdk {

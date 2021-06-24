@@ -81,6 +81,38 @@ void decode_sbus_data(const uint8_t *data, sbus_state_t *decoded)
     decoded->failsafe = data[23] & (1<<3);
 }
 
+void sbus_pio_init(PIO pio, int rx_pin, int dbg_pin)
+{
+    // init mutex
+    critical_section_init(&fifo_lock);
+    // clear fifo
+    for(int i = 0; i < SBUS_FIFO_SIZE; ++i)
+    {
+        memset((void *)sbus_data[i], 0, SBUS_MESSAGE_MAX_SIZE);
+    }
+    oldest = newest = stored = 0;
+
+    uint sm = 0;
+    uint offset = 0;
+    uint baud = 100000;
+    uart_8e2_rx_program_init(pio, sm, offset, rx_pin, baud, dbg_pin);
+
+    /*
+
+    // Set up a RX interrupt
+    // We need to set up the handler first
+    // Select correct interrupt for the UART we are using
+    int UART_IRQ = uart == uart0 ? UART0_IRQ : UART1_IRQ;
+
+    // And set up and enable the interrupt handlers
+    irq_set_exclusive_handler(UART_IRQ, sbus_on_uart_rx);
+    irq_set_enabled(UART_IRQ, true);
+
+    // Now enable the UART to send interrupts - RX only
+    uart_set_irq_enables(uart, true, false);
+    */
+
+}
 
 void sbus_init(uart_inst_t *uart, int rx_pin, int tx_pin)
 {
