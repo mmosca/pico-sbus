@@ -24,6 +24,8 @@ volatile bool hasStartByte = false;
 
 
 static uart_inst_t *sbus_uart_id;
+uint sm;
+PIO sbus_pio;
 
 critical_section_t fifo_lock;
 
@@ -92,7 +94,7 @@ void sbus_pio_init(PIO pio, int rx_pin, int dbg_pin)
     }
     oldest = newest = stored = 0;
 
-    uint sm = 0;
+    sm = 0;
     uint offset = 0;
     uint baud = 100000;
     uart_8e2_rx_program_init(pio, sm, offset, rx_pin, baud, dbg_pin);
@@ -101,6 +103,7 @@ void sbus_pio_init(PIO pio, int rx_pin, int dbg_pin)
     // We need to set up the handler first
     // Select correct interrupt for the UART we are using
     int PIO_IRQ = pio == pio0 ? PIO0_IRQ_0 : PIO1_IRQ_0;
+    sbus_pio = pio;
 
     // And set up and enable the interrupt handlers
     irq_set_exclusive_handler(PIO_IRQ, sbus_on_pio_rx);
@@ -229,10 +232,9 @@ void sbus_on_uart_rx() {
 void sbus_on_pio_rx() {
     irq_count++;
 
-    /*
 
-    while (uart_is_readable(sbus_uart_id)) {
-        uint8_t ch = uart_getc(sbus_uart_id);
+    while (pio_is_readable(sbus_pio, sm)) {
+        uint8_t ch = pio_getc(sbus_pio, sm);
         if(!hasStartByte && ch != SBUS_STARTBYTE)
         {
             continue;
@@ -268,6 +270,5 @@ void sbus_on_pio_rx() {
             }
         }
     }
-    */
 }
 
