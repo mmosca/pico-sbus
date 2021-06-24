@@ -43,6 +43,8 @@ bool readSbusData(uint8_t *data);
 
 void sbus_on_uart_rx();
 
+void sbus_on_pio_rx();
+
 void decode_sbus_data(const uint8_t *data, sbus_state_t *decoded);
 
 void sbus_init(uart_inst_t *uart, int rx_pin, int tx_pin);

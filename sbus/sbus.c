@@ -97,21 +97,17 @@ void sbus_pio_init(PIO pio, int rx_pin, int dbg_pin)
     uint baud = 100000;
     uart_8e2_rx_program_init(pio, sm, offset, rx_pin, baud, dbg_pin);
 
-    /*
-
     // Set up a RX interrupt
     // We need to set up the handler first
     // Select correct interrupt for the UART we are using
-    int UART_IRQ = uart == uart0 ? UART0_IRQ : UART1_IRQ;
+    int PIO_IRQ = pio == pio0 ? PIO0_IRQ_0 : PIO1_IRQ_0;
 
     // And set up and enable the interrupt handlers
-    irq_set_exclusive_handler(UART_IRQ, sbus_on_uart_rx);
-    irq_set_enabled(UART_IRQ, true);
+    irq_set_exclusive_handler(PIO_IRQ, sbus_on_pio_rx);
+    irq_set_enabled(PIO_IRQ, true);
 
     // Now enable the UART to send interrupts - RX only
-    uart_set_irq_enables(uart, true, false);
-    */
-
+    pio_set_irq0_source_enabled(pio, pis_sm0_rx_fifo_not_empty , true);
 }
 
 void sbus_init(uart_inst_t *uart, int rx_pin, int tx_pin)
@@ -226,5 +222,52 @@ void sbus_on_uart_rx() {
             }
         }
     }
+}
+
+// RX interrupt handler
+// Do not print or wait
+void sbus_on_pio_rx() {
+    irq_count++;
+
+    /*
+
+    while (uart_is_readable(sbus_uart_id)) {
+        uint8_t ch = uart_getc(sbus_uart_id);
+        if(!hasStartByte && ch != SBUS_STARTBYTE)
+        {
+            continue;
+        }
+
+        hasStartByte = true;
+        current_sbus_data[sbus_index++] = ch;
+
+        if(sbus_index == SBUS_MESSAGE_MAX_SIZE)
+        {
+            hasStartByte = false;
+            sbus_index = 0;
+
+            if(current_sbus_data[SBUS_MESSAGE_MAX_SIZE - 1] == SBUS_ENDBYTE ||
+                (current_sbus_data[SBUS_MESSAGE_MAX_SIZE - 1] & SBUS2_ENDBYTE_MASK) == SBUS2_ENDBYTE)
+            {
+                critical_section_enter_blocking(&fifo_lock);
+                uint8_t nextNewest = (newest + 1) % SBUS_FIFO_SIZE;
+                // full package
+                memcpy((void *)sbus_data[nextNewest], (void *)current_sbus_data, SBUS_MESSAGE_MAX_SIZE);
+                newest = nextNewest;
+                if(oldest = nextNewest)
+                {
+                    oldest = (oldest + 1) % SBUS_FIFO_SIZE;
+                }
+
+                stored++;
+                if(stored > SBUS_FIFO_SIZE)
+                {
+                    stored = SBUS_FIFO_SIZE;
+                }
+                critical_section_exit(&fifo_lock);
+            }
+        }
+    }
+    */
 }
 
