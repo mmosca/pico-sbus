@@ -13,10 +13,11 @@
 ; IN pin 0 and JMP pin are both mapped to the GPIO used as UART RX.
 
 start:
-    wait 0 pin 0  side 0  ; Stall until start bit is asserted
-    set y, 0              ; Initialize parity, 0 for Even, 1 for Odd
-    ;set isr, 0           ; clear isr
-    set x, 7   [7]        ; Preload bit counter, then delay until halfway through
+    set x, 7   [7] side 1 ; Just debug
+    wait 0 pin 0   side 0 ; Stall until start bit is asserted
+    set y, 0       side 1 ; Initialize parity, 0 for Even, 1 for Odd
+    ;set isr, 0    side 0 ; clear isr
+    set x, 7   [7] side 0 ; Preload bit counter, then delay until halfway through
     set x, 7   [2]        ; Original code has 10 delay for set x, 7. .side_set
                           ; limits the max delay to 7. Use a noop + delay 2
 bitloop:                  ; the first data bit (12 cycles incl wait, set).
@@ -78,12 +79,15 @@ static inline void uart_8e2_rx_program_init(PIO pio, uint sm, uint offset, uint 
     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, false);
 
     pio_gpio_init(pio, pin);
+    pio_gpio_init(pio, dbg_pin);
     gpio_pull_up(pin);
+    gpio_pull_down(dbg_pin);
 
     pio_sm_config c = uart_8e2_rx_program_get_default_config(offset);
     sm_config_set_in_pins(&c, pin); // for WAIT, IN
     sm_config_set_jmp_pin(&c, pin); // for JMP
     sm_config_set_sideset_pins(&c, dbg_pin);
+
 
     // Shift to right, autopull disabled
     sm_config_set_in_shift(&c, true, false, 32);
@@ -92,7 +96,12 @@ static inline void uart_8e2_rx_program_init(PIO pio, uint sm, uint offset, uint 
     // SM transmits 1 bit per 8 execution cycles.
     float div = (float)clock_get_hz(clk_sys) / (8 * baud);
     sm_config_set_clkdiv(&c, div);
-    
+
+    // Clear IRQ flag before starting
+    hw_clear_bits(&pio->inte0, 1u << sm);
+    hw_clear_bits(&pio->inte1, 1u << sm);
+    pio->irq = 1u << sm;
+
     pio_sm_init(pio, sm, offset, &c);
     pio_sm_set_enabled(pio, sm, true);
 }
