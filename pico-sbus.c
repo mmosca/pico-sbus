@@ -15,9 +15,11 @@ int main() {
     stdio_init_all();
 
     // Initialize SBUS and setup interrupt to read data on core0
-    //sbus_init(SBUS_UART_ID, UART_RX_PIN, UART_TX_PIN);
-
+#ifndef USE_PIO
+    sbus_init(SBUS_UART_ID, UART_RX_PIN, UART_TX_PIN);
+#else
     sbus_pio_init(pio0, 9, 10);
+#endif
     
     hid_init();
 

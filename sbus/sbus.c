@@ -94,6 +94,8 @@ void sbus_pio_init(PIO pio, int rx_pin, int dbg_pin)
     }
     oldest = newest = stored = 0;
 
+    pio_add_program(pio, &uart_8e2_rx_program);
+
     sm = 0;
     uint offset = 0;
     uint baud = 100000;
