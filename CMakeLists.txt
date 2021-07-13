@@ -75,3 +75,4 @@ target_link_libraries(pico-sbus-pio
 
 
 pico_add_extra_outputs(pico-sbus)
+pico_add_extra_outputs(pico-sbus-pio)
