@@ -31,6 +31,11 @@
 
 #define SBUS_FIFO_SIZE	2
 
+extern volatile int irq_count;
+extern uint sm;
+extern PIO sbus_pio;
+
+
 typedef struct {
     uint16_t ch[SBUS_CHANNEL_COUNT];
     bool framelost;
@@ -42,6 +47,7 @@ bool hasSbusData();
 bool readSbusData(uint8_t *data);
 
 void sbus_on_uart_rx();
+void sbus_on_uart_rx_alt();
 
 void sbus_on_pio_rx();
 
@@ -49,5 +55,6 @@ void decode_sbus_data(const uint8_t *data, sbus_state_t *decoded);
 
 void sbus_init(uart_inst_t *uart, int rx_pin, int tx_pin);
 void sbus_pio_init(PIO pio, int rx_pin, int dbg_pin);
+void sbus_pio_init_alt(PIO pio, int rx_pin);
 
 #endif
