@@ -43,6 +43,33 @@
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-gcc-arm"
+        },
+        {
+            "name": "pico-arm-linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${env:PICO_SDK_PATH}/src/common/pico_stdlib/include",
+                "${env:PICO_SDK_PATH}/src/common/boot_picoboot/include",
+                "${env:PICO_SDK_PATH}/src/common/boot_uf2/include",
+                "${env:PICO_SDK_PATH}/src/common/pico_base/include",
+                "${env:PICO_SDK_PATH}/src/common/pico_binary_info/include",
+                "${env:PICO_SDK_PATH}/src/common/pico_bit_ops/include",
+                "${env:PICO_SDK_PATH}/src/common/pico_divider/include",
+                "${env:PICO_SDK_PATH}/src/common/pico_sync/include",
+                "${env:PICO_SDK_PATH}/src/common/pico_time/include",
+                "${env:PICO_SDK_PATH}/src/common/pico_util/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-arm",
+            "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
     "version": 4
