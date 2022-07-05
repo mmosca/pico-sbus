@@ -7,6 +7,7 @@
 #include "hardware/uart.h"
 
 #define SBUS_UART_ID uart1
+
 // We are using pins 0 and 1, but see the GPIO function select table in the
 // datasheet for information on which other pins can be used.
 #define UART_TX_PIN 4
@@ -19,8 +20,6 @@
 
 #define SBUS_STARTBYTE	0x0F
 #define SBUS_ENDBYTE	0X00
-#define SBUS2_ENDBYTE_MASK	0X0F
-#define SBUS2_ENDBYTE	0X04
 #define SBUS_MESSAGE_MAX_SIZE 25
 #define SBUS_CHANNEL_BIT_MASK   0x7FF
 #define SBUS_CHANNEL_BIT_MASK_NO_FIRST_BIT (SBUS_CHANNEL_BITS & ~1)
