@@ -6,6 +6,8 @@
 #include "tusb.h"
 #include "sbus.h"
 
+#include "custom-device/rc-joy-hid.h"
+
 #define INPUT_MAX_BUTTONS 32
 
 typedef enum input_button_type {
@@ -28,8 +30,11 @@ typedef struct {
 #define INPUT_DEFAULT_XR 0
 #define INPUT_DEFAULT_YR 1
 
-#define INPUT_DEFAULT_Z  5
-#define INPUT_DEFAULT_ZR 7
+#define INPUT_DEFAULT_LD 7
+#define INPUT_DEFAULT_RD 8
+
+#define INPUT_DEFAULT_LS 5
+#define INPUT_DEFAULT_RS 6
 
 typedef struct __attribute__((__packed__)) {
     // Axis channel numbers 0-17
@@ -37,20 +42,23 @@ typedef struct __attribute__((__packed__)) {
     uint8_t ly;
     uint8_t rx;
     uint8_t ry;
-    uint8_t z;
-    uint8_t rz;
+    uint8_t ld;
+    uint8_t rd;
+    uint8_t ls;
+    uint8_t rs;
 
     input_button_mapping_item_t button_map[INPUT_MAX_BUTTONS];
 } input_map_t;
+
 
 void get_input_map(input_map_t *);
 
 bool parse_input_map(uint8_t *data, size_t data_size, input_map_t *newMap);
 
-uint8_t getAxisFromSbus(const sbus_state_t *sbus, int channel);
+int16_t getAxisFromSbus(const sbus_state_t *sbus, int channel);
 bool isPressed(const sbus_state_t *sbus, const input_button_mapping_item_t *map);
 
-void sbus2gamepad_report(const input_map_t *map, const sbus_state_t *sbus, hid_gamepad_report_t *hid);
+void sbus2gamepad_report(const input_map_t *map, const sbus_state_t *sbus, hid_rcgamepad_report_t *hid);
 
 
 #endif
