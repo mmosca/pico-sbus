@@ -5,25 +5,26 @@ Turn your RC radio into a controller for your PC.
 ## Channel mapping
 The default channel map aims at being usefull for 6 channel radios while exposing as much functionality as possible.
 
-Channel - Function
-1. Stick R Y
-2. Stick R X
-3. Stick L Y (Y Rotation)
-4. Stick L X (X Rotation)
-5. Button 1, 2, 3 (Low, Mid, Max)
-6. Z
-7. Z rotation
-8. Slider
-9. Dial
-10. Button 4, 5, 6
-11. Button 7, 8, 9,
-12. Button 10, 11, 12
-13. Button 13, 14, 15
-14. Button 16, 17, 18
-15. Button 19, 20, 21
-16. Button 22, 23, 24
-17. Button 25
-18. Button 26
+| Channel | Function                        |
+| ------- | ------------------------------- |  
+| 1.      | Stick R Y                       |
+| 2.      | Stick R X                       |
+| 3.      | Stick L Y (Y Rotation)          |
+| 4.      | Stick L X (X Rotation)          |
+| 5.      |  Button 1, 2, 3 (Low, Mid, Max) |
+| 6.      | Z                               |
+| 7.      | Z rotation                      |
+| 8.      | Slider                          |
+| 9.      | Dial                            |
+| 10.     | Button 4, 5, 6                  |
+| 11.     |  Button 7, 8, 9                 |
+| 12.     | Button 10, 11, 12               |
+| 13.     | Button 13, 14, 15               |
+| 14.     |  Button 16, 17, 18              |
+| 15.     |  Button 19, 20, 21              |
+| 16.     | Button 22, 23, 24               |
+| 17.     |  Button 25                      |
+| 18.     | Button 26                       |
 
 ## TX Settings
 These are the function settins on my Futaba T16IZ. I ran out of switches for channels 15 and 16.
