@@ -7,7 +7,7 @@ PREFIX=$1
 
 set -x
 
-if [ $PREFIX = "" ]
+if [ "$PREFIX" = "" ]
 then
 
   openocd -f $OPENOCD_IFACE -f $OPENOCD_TARGET -c "program pico-sbus.elf verify reset exit"
