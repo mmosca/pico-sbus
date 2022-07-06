@@ -12,18 +12,42 @@ Channel - Function
 4. Stick L X (X Rotation)
 5. Button 1, 2, 3 (Low, Mid, Max)
 6. Z
-7. Button 4, 5, 6
-8. Z rotation
-9. Button 7, 8, 9
-10. Button 10, 11, 12
-11. Button 13, 14, 15
-12. Button 16, 17, 18
-13. Button 19, 20, 21
-14. Button 22, 23, 24
-15. Button 25, 26, 27
-16. Button 28, 29, 30
-17. Button 31 (Digital ch1)
-18. Button 32 (Digital ch2)
+7. Z rotation
+8. Slider
+9. Dial
+10. Button 4, 5, 6
+11. Button 7, 8, 9,
+12. Button 10, 11, 12
+13. Button 13, 14, 15
+14. Button 16, 17, 18
+15. Button 19, 20, 21
+16. Button 22, 23, 24
+17. Button 25
+18. Button 26
+
+## TX Settings
+These are the function settins on my Futaba T16IZ. I ran out of switches for channels 15 and 16.
+
+|Ch.| Function  | Control |
+|---|-----------|---------|
+| 1 | Aileron   | J1      |
+| 2 | Elevator  | J2      |
+| 3 | Throttle  | J3      |
+| 4 | Rudder    | J4      |
+| 5 | Gear      | SE      |
+| 6 | Air Brake | LS      |
+| 7 | Aux 5     | RS      |
+| 8 | Aux 4     | LD      |
+| 9 | Aux 3     | RD      |
+|10 | Aux 2     | SF      |
+|11 | Aux 1     | SH      |
+|12 | Aux 6     | SG      |
+|13 | Aux 7     | SC      |
+|14 | Camber    | SB      |
+|15 | Flap      | N/A     |
+|16 | Motor     | N/A     |
+|DG1| N/A       | SD      |
+|DG2| N/A       | SA      |
 
 # Pinout
 The circuit can be powered by the PICO VBUS and 3V3(out) pins when plugged in USB.
