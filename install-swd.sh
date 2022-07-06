@@ -1,6 +1,6 @@
 #!/bin/bash
-OPENOCD_IFACE=/usr/share/openocd/scripts/interface/raspberrypi-swd.cfg
-OPENOCD_TARGET=/usr/share/openocd/scripts/target/rp2040.cfg
+OPENOCD_IFACE=interface/raspberrypi-swd.cfg
+OPENOCD_TARGET=target/rp2040.cfg
 
 set -x
 
