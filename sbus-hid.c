@@ -58,7 +58,7 @@ void hid_main()
     uint8_t sbusData[SBUS_MESSAGE_MAX_SIZE] = {};
     sbus_state_t sbus = {};
     int clear_counter = 0;
-    const uint32_t interval_ms = 500;
+    const uint32_t interval_ms = 20;
     uint32_t start_ms = board_millis();
 
     while(1)
@@ -169,18 +169,19 @@ static void send_hid_report(uint8_t report_id, const sbus_state_t *sbus)
     {
         case REPORT_ID_GAMEPAD:
         {
-            if(!sbus->framelost)
+            if (!sbus->framelost)
             {
-                hid_gamepad_report_t report =
-                {
-                    .x = getAxisFromSbus(sbus, input_map.lx),
-                    .y = getAxisFromSbus(sbus, input_map.ly),
-                    .z = getAxisFromSbus(sbus, input_map.z),
-                    .rz = getAxisFromSbus(sbus, input_map.rz),
-                    .rx = getAxisFromSbus(sbus, input_map.rx),
-                    .ry = getAxisFromSbus(sbus, input_map.ry),
-                    .hat = 0,
-                    .buttons = 0};
+                hid_rcgamepad_report_t report =
+                    {
+                        .x = getAxisFromSbus(sbus, input_map.lx),
+                        .y = getAxisFromSbus(sbus, input_map.ly),
+                        .rx = getAxisFromSbus(sbus, input_map.rx),
+                        .ry = getAxisFromSbus(sbus, input_map.ry),
+                        .ls = getAxisFromSbus(sbus, input_map.ls),
+                        .rs = getAxisFromSbus(sbus, input_map.rs),
+                        .ld = getAxisFromSbus(sbus, input_map.ld),
+                        .rd = getAxisFromSbus(sbus, input_map.rd),
+                        .buttons = 0};
 
                 for (int i = 0; i < INPUT_MAX_BUTTONS; ++i)
                 {
