@@ -1,3 +1,13 @@
 {
-    "cmake.buildDirectory": "${workspaceFolder}/build-win"
+    "cmake.buildDirectory": "${workspaceFolder}/build-vscode",
+    //"cmake.generator": "Unix Makefiles",
+    "cmake.generator": "",
+    "cmake.environment": {
+        "PICO_SDK_PATH":"dev/pico/pico-sdkaaaa",
+        "PICO_BOARD":"pico"
+    },
+    "cmake.configureArgs": [
+        "-DPICO_SDK_PATH=/home/mosca/dev/pico/pico-sdk",
+        "-DPICO_BOARD=pico"
+    ]
 }
